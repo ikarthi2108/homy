@@ -66,6 +66,7 @@ import DashboardAddProperty from '../pages/DashboardAddProperty';
 import DashboardFavourites from '../pages/DashboardFavourites';
 import DashboardSavedSearch from '../pages/DashboardSavedSearch';
 import DashboardReview from '../pages/DashboardReview';
+import FilteredProperty from '../components/search-dropdown/home-dropdown/FilteredProperty';
 
 const AppNavigation = () => {
   return (
@@ -73,6 +74,7 @@ const AppNavigation = () => {
       <ScrollToTop />
       <ToastContainer position="top-center" />
       <Routes>
+        <Route path="/filtered-properties" element={<FilteredProperty/>}/>
         <Route path="/" element={<Home />} />
         <Route path="/home-two" element={<HomeTwo />} />
         <Route path="/home-three" element={<HomeThree />} />

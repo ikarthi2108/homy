@@ -1,41 +1,53 @@
+import React from 'react';
 import NiceSelect from "../../../ui/NiceSelect";
+import { useNavigate } from 'react-router-dom';
 
 const DropdownOne = ({ style }: any) => {
-  const selectHandler = () => {};
+  const navigate = useNavigate();
 
-  const searchHandler = () => {
-    window.location.href = "/listing_0";
+  const searchHandler = (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+    const criteria = {
+      category: formData.get('category') || "", // Remove default value
+      location: formData.get('location') || "", // Remove default value
+      priceRange: formData.get('priceRange') || "", // Remove default value
+    };
+    // navigate('/filtered-properties', { state: criteria });
+    navigate('/listing_01')
+  };
+
+  const handleSelectChange = (value: string, name: string) => {
+    console.log(`Selected ${name}:`, value);
+    // Handle changes specific to the dropdowns if needed
   };
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        searchHandler();
-      }}
-    >
+    <form onSubmit={searchHandler}>
       <div className="row gx-0 align-items-center">
-        <div className="col-xl-3 col-lg-4">
+        {/* <div className="col-xl-3 col-lg-4">
           <div className="input-box-one border-left">
             <div className="label">I’m looking to...</div>
             <NiceSelect
               className={`nice-select ${style ? "fw-normal" : ""}`}
               options={[
-                { value: "condos", text: "Rent Houses" },
-                { value: "houses", text: "Sell Houses" },
-                { value: "industrial", text: "Looking For PG Men's" },
-                { value: "villas", text: "Looking For PG Women's" },
-                { value: "villas", text: "Looking For PG Co-Living" },
-                { value: "apartments", text: "Buy Apartments" },
+                { value: "Renthouse", text: "Rent Houses" },
+                { value: "sellhouse", text: "Sell Houses" },
+                { value: "pgmen", text: "Looking For PG Men's" },
+                { value: "pgwomen", text: "Looking For PG Women's" },
+                { value: "pgcoliving", text: "Looking For PG Co-Living" },
+                { value: "buyapartments", text: "Buy Apartments" },
               ]}
               defaultCurrent={0}
-              onChange={selectHandler}
-              name=""
+              name="category"
+              onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+                handleSelectChange(event.target.value, 'category')
+              }
               placeholder=""
             />
           </div>
-        </div>
-        <div className={`${style ? "col-xl-3" : "col-xl-4"} col-lg-4`}>
+        </div> */}
+        {/* <div className={`${style ? "col-xl-3" : "col-xl-4"} col-lg-4`}>
           <div className="input-box-one border-left">
             <div className="label">Location</div>
             <NiceSelect
@@ -49,33 +61,37 @@ const DropdownOne = ({ style }: any) => {
                 { value: "trivandrum", text: "Trivandrum, India" },
               ]}
               defaultCurrent={0}
-              onChange={selectHandler}
-              name=""
+              name="location"
+              onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+                handleSelectChange(event.target.value, 'location')
+              }
               placeholder=""
             />
           </div>
-        </div>
-        <div className="col-xl-3 col-lg-4">
+        </div> */}
+        {/* <div className="col-xl-3 col-lg-4">
           <div className="input-box-one border-left border-lg-0">
             <div className="label">Price Range</div>
             <NiceSelect
               className={`nice-select ${style ? "fw-normal" : ""}`}
               options={[
-               { value: "1", text: "₹3,000 - ₹5,000" },
-               { value: "2", text: "₹5,000 - ₹8,000" },
-               { value: "3", text: "₹8,000 - ₹10,000" },
-               { value: "4", text: "₹10,000 - ₹15,000" },
-               { value: "5", text: "₹15,000 - ₹20,000" },
-               { value: "6", text: "₹20,000 - ₹30,000" },
-               { value: "7", text: "₹30,000 - ₹50,000" }
+                { value: "1", text: "₹3,000 - ₹5,000" },
+                { value: "2", text: "₹5,000 - ₹8,000" },
+                { value: "3", text: "₹8,000 - ₹10,000" },
+                { value: "4", text: "₹10,000 - ₹15,000" },
+                { value: "5", text: "₹15,000 - ₹20,000" },
+                { value: "6", text: "₹20,000 - ₹30,000" },
+                { value: "7", text: "₹30,000 - ₹50,000" },
               ]}
               defaultCurrent={0}
-              onChange={selectHandler}
-              name=""
+              name="priceRange"
+              onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+                handleSelectChange(event.target.value, 'priceRange')
+              }
               placeholder=""
             />
           </div>
-        </div>
+        </div> */}
         <div className={`${style ? "col-xl-3" : "col-xl-2"}`}>
           <div className="input-box-one lg-mt-10">
             <button
@@ -85,7 +101,7 @@ const DropdownOne = ({ style }: any) => {
                   : "text-uppercase search-btn"
               }`}
             >
-              {style ? "Search Now" : "Search"}
+              {style ? "Search Now" : "Explore Our Listings"}
             </button>
           </div>
         </div>

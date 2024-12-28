@@ -7,6 +7,7 @@ const ListingOneArea: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [locationFilter, setLocationFilter] = useState<string>('');
   const [priceRange, setPriceRange] = useState<{ min: number; max: number }>({ min: 0, max: Infinity });
 
   useEffect(() => {
@@ -28,11 +29,12 @@ const ListingOneArea: React.FC = () => {
   useEffect(() => {
     const filtered = properties.filter((property) => {
       const matchesCategory = categoryFilter ? property.category === categoryFilter : true;
+      const matchesLocation = locationFilter ? property.city.toLowerCase() === locationFilter.toLowerCase() : true;
       const matchesPrice = property.price >= priceRange.min && property.price <= priceRange.max;
-      return matchesCategory && matchesPrice;
+      return matchesCategory && matchesLocation && matchesPrice;
     });
     setFilteredProperties(filtered);
-  }, [categoryFilter, priceRange, properties]);
+  }, [categoryFilter, locationFilter, priceRange, properties]);
 
   // Image Carousel Component
   const ImageCarousel: React.FC<{ images: string[] }> = ({ images }) => {
@@ -179,7 +181,7 @@ const ListingOneArea: React.FC = () => {
           marginBottom: '20px',
           justifyContent: 'center',
           alignItems: 'center',
-          flexWrap: 'nowrap',
+          flexWrap: 'wrap',
         }}
       >
         <select
@@ -198,6 +200,27 @@ const ListingOneArea: React.FC = () => {
           <option value="Residential">Residential</option>
           <option value="Commercial">Commercial</option>
           {/* Add other categories as needed */}
+        </select>
+
+        <select
+          value={locationFilter}
+          onChange={(e) => setLocationFilter(e.target.value)}
+          style={{
+            padding: '10px',
+            borderRadius: '5px',
+            border: '1px solid #ddd',
+            backgroundColor: '#fff',
+            cursor: 'pointer',
+            flex: '1',
+          }}
+        >
+          <option value="">All Locations</option>
+          <option value="Bangalore">Bangalore</option>
+          <option value="Chennai">Chennai</option>
+          <option value="Hyderabad">Hyderabad</option>
+          <option value="Kochi">Kochi</option>
+          <option value="Trivandrum">Trivandrum</option>
+          {/* Add other locations as needed */}
         </select>
 
         <input
@@ -234,46 +257,62 @@ const ListingOneArea: React.FC = () => {
           gap: '20px',
         }}
       >
-        {filteredProperties.map((property) => (
-          <div
-            key={property._id}
-            style={{
-              border: '1px solid #ddd',
-              borderRadius: '10px',
-              padding: '20px',
-              backgroundColor: '#fff',
-              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-              cursor: 'pointer',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.02)')}
-            onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-          >
-            {/* Image Carousel */}
-            {property.images && property.images.length > 0 && (
-              <ImageCarousel images={property.images} />
-            )}
+        {filteredProperties.length > 0 ? (
+          filteredProperties.map((property) => (
+            <div
+              key={property._id}
+              style={{
+                border: '1px solid #ddd',
+                borderRadius: '10px',
+                padding: '20px',
+                backgroundColor: '#fff',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.02)')}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+            >
+              {/* Image Carousel */}
+              {property.images && property.images.length > 0 && (
+                <ImageCarousel images={property.images} />
+              )}
 
-            {/* Property Details */}
-            <h2 style={{ marginTop: '20px', color: '#333' }}>{property.title}</h2>
-            <p style={{ color: '#666' }}>{property.description}</p>
-            <p>
-              <strong>Category:</strong> {property.category}
-            </p>
-            <p>
-              <strong>Price:</strong> {property.price}
-            </p>
-            <p>
-              <strong>Bedrooms:</strong> {property.bedrooms}
-            </p>
-            <p>
-              <strong>Bathrooms:</strong> {property.bathrooms}
-            </p>
-            <p>
-              <strong>City:</strong> {property.city}
-            </p>
+              {/* Property Details */}
+              <h2 style={{ marginTop: '20px', color: '#333' }}>{property.title}</h2>
+              <p style={{ color: '#666' }}>{property.description}</p>
+              <p>
+                <strong>Category:</strong> {property.category}
+              </p>
+              <p>
+                <strong>Price:</strong> {property.price}
+              </p>
+              <p>
+                <strong>Bedrooms:</strong> {property.bedrooms}
+              </p>
+              <p>
+                <strong>Bathrooms:</strong> {property.bathrooms}
+              </p>
+              <p>
+                <strong>City:</strong> {property.city}
+              </p>
+            </div>
+          ))
+        ) : (
+          <div
+            style={{
+              textAlign: 'center',
+              width: '100%',
+              padding: '20px',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '10px',
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+              margin: '20px 0',
+            }}
+          >
+            <h3 style={{ color: '#6c757d', margin: 0 }}>No properties found in the given criteria.</h3>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
