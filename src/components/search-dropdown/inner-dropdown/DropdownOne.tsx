@@ -2,7 +2,25 @@ import { Link } from "react-router-dom";
 import NiceSelect from "../../../ui/NiceSelect";
 import PriceRange from "../../common/PriceRange";
 
-const ammenities_data: string[] = ["A/C & Heating", "Garages", "Garden", "Disabled Access", "Swimming Pool", "Parking", "Wifi", "Pet Friendly", "Ceiling Height", "Fireplace", "Play Ground", "Elevator"]
+const ammenities_data: string[] = [
+   "A/C & Heating", "Garages", "Garden", "Disabled Access", "Swimming Pool", 
+   "Parking", "Wifi", "Pet Friendly", "Ceiling Height", "Fireplace", 
+   "Play Ground", "Elevator"
+];
+
+interface DropdownOneProps {
+   handleBathroomChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+   handleBedroomChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+   handleSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+   handlePriceChange: (values: number[]) => void;
+   maxPrice: number;
+   priceValue: number[];
+   handleResetFilter: () => void;
+   selectedAmenities?: string[]; // Make it optional
+   handleAmenityChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+   handleLocationChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+   handleStatusChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+}
 
 const DropdownOne = ({
    handleBathroomChange,
@@ -12,10 +30,11 @@ const DropdownOne = ({
    maxPrice,
    priceValue,
    handleResetFilter,
-   selectedAmenities,
+   selectedAmenities = [], // Default to an empty array
    handleAmenityChange,
    handleLocationChange,
-   handleStatusChange, }: any) => {
+   handleStatusChange,
+}: DropdownOneProps) => {
 
    return (
       <form onSubmit={(e) => e.preventDefault()}>
@@ -102,15 +121,14 @@ const DropdownOne = ({
 
             <div className="col-12">
                <h6 className="block-title fw-bold mb-30">Amenities</h6>
-               <ul
-                  className="style-none d-flex flex-wrap justify-content-between filter-input">
+               <ul className="style-none d-flex flex-wrap justify-content-between filter-input">
                   {ammenities_data.map((list, i) => (
                      <li key={i}>
                         <input
                            type="checkbox"
                            name="Amenities"
                            value={list}
-                           checked={selectedAmenities.includes(list)}
+                           checked={selectedAmenities.includes(list)} // Ensure selectedAmenities is defined
                            onChange={handleAmenityChange}
                         />
                         <label>{list}</label>
@@ -122,8 +140,7 @@ const DropdownOne = ({
             <div className="col-12">
                <h6 className="block-title fw-bold mt-25 mb-15">Price range</h6>
                <div className="price-ranger">
-                  <div
-                     className="price-input d-flex align-items-center justify-content-between pt-5">
+                  <div className="price-input d-flex align-items-center justify-content-between pt-5">
                      <div className="field d-flex align-items-center">
                         <input type="number" className="input-min" value={priceValue[0]} onChange={() => handlePriceChange} />
                      </div>
@@ -172,7 +189,7 @@ const DropdownOne = ({
             </div>
          </div>
       </form>
-   )
-}
+   );
+};
 
-export default DropdownOne
+export default DropdownOne;

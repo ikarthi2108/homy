@@ -1,154 +1,282 @@
-import ReactPaginate from "react-paginate"
-import UseShortedProperty from "../../../hooks/useShortedProperty"
-import NiceSelect from "../../../ui/NiceSelect"
-import { Link } from "react-router-dom"
-import DropdownOne from "../../search-dropdown/inner-dropdown/DropdownOne"
-import PropertyCarousel from "../../homes/home-two/PropertyCarousel"
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-const ListingOneArea = () => {
+const ListingOneArea: React.FC = () => {
+  const [properties, setProperties] = useState<any[]>([]);
+  const [filteredProperties, setFilteredProperties] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [priceRange, setPriceRange] = useState<{ min: number; max: number }>({ min: 0, max: Infinity });
 
-   const itemsPerPage = 8;
-   const page = "listing_1";
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/properties');
+        setProperties(response.data.properties || []);
+        setFilteredProperties(response.data.properties || []);
+      } catch (err) {
+        setError('Failed to fetch data');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-   const {
-      itemOffset,
-      sortedProperties,
-      currentItems,
-      pageCount,
-      handlePageClick,
-      handleBathroomChange,
-      handleBedroomChange,
-      handleSearchChange,
-      handlePriceChange,
-      maxPrice,
-      priceValue,
-      resetFilters,
-      selectedAmenities,
-      handleAmenityChange,
-      handleLocationChange,
-      handleStatusChange,
-      handleTypeChange,
-   } = UseShortedProperty({ itemsPerPage, page });
+    fetchData();
+  }, []);
 
-   const handleResetFilter = () => {
-      resetFilters();
-   };
+  useEffect(() => {
+    const filtered = properties.filter((property) => {
+      const matchesCategory = categoryFilter ? property.category === categoryFilter : true;
+      const matchesPrice = property.price >= priceRange.min && property.price <= priceRange.max;
+      return matchesCategory && matchesPrice;
+    });
+    setFilteredProperties(filtered);
+  }, [categoryFilter, priceRange, properties]);
 
-   return (
-      <div className="property-listing-six bg-pink-two pt-110 md-pt-80 pb-150 xl-pb-120 mt-150 xl-mt-120">
-         <div className="container container-large">
-            <div className="row">
-               <div className="col-lg-8">
-                  <div className="ps-xxl-5">
-                     <div className="listing-header-filter d-sm-flex justify-content-between align-items-center mb-40 lg-mb-30">
-                        <div>Showing <span className="color-dark fw-500">{itemOffset + 1}–{itemOffset + currentItems.length}</span> of <span
-                           className="color-dark fw-500">{sortedProperties.length}</span> results</div>
-                        <div className="d-flex align-items-center xs-mt-20">
-                           <div className="short-filter d-flex align-items-center">
-                              <div className="fs-16 me-2">Short by:</div>
-                              <NiceSelect
-                                 className="nice-select"
-                                 options={[
-                                    { value: "newest", text: "Newest" },
-                                    { value: "best_seller", text: "Best Seller" },
-                                    { value: "best_match", text: "Best Match" },
-                                    { value: "price_low", text: "Price Low" },
-                                    { value: "price_high", text: "Price High" },
-                                 ]}
-                                 defaultCurrent={0}
-                                 onChange={handleTypeChange}
-                                 name=""
-                                 placeholder="" />
-                           </div>
-                           <Link to="/listing_02" className="tran3s layout-change rounded-circle ms-auto ms-sm-3"
-                              data-bs-toggle="tooltip" title="Switch To List View">
-                              <i className="fa-regular fa-bars"></i>
-                           </Link>
-                        </div>
-                     </div>
+  // Image Carousel Component
+  const ImageCarousel: React.FC<{ images: string[] }> = ({ images }) => {
+    const [currentIndex, setCurrentIndex] = useState<number>(0);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
-                     <div className="row gx-xxl-5">
-                        {currentItems.map((item: any) => (
-                           <div key={item.id} className="col-md-6 d-flex mb-50">
-                              <div className="listing-card-one border-25 h-100 w-100">
-                                 <div className="img-gallery p-15">
-                                    <div className="prperty-carousel-slider position-relative border-25 overflow-hidden">
-                                       <div className={`tag border-25 ${item.tag_bg}`}>{item.tag}</div>
-                                       <Link to="#" className="fav-btn tran3s"><i className="fa-light fa-heart"></i></Link>
-                                       <PropertyCarousel item={item} />
-                                    </div>
-                                 </div>
+    const handlePrev = () => {
+      setCurrentIndex((prevIndex) => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
+      console.log('Previous Index:', currentIndex); // Debugging
+    };
 
-                                 <div className="property-info p-25">
-                                    <Link to="/listing_details_01" className="title tran3s">{item.title}</Link>
-                                    <div className="address">{item.address}</div>
-                                    <ul className="style-none feature d-flex flex-wrap align-items-center justify-content-between">
-                                       <li className="d-flex align-items-center">
-                                          <img src="/assets/images/icon/icon_04.svg" alt=""
-                                             className="lazy-img icon me-2" />
-                                          <span className="fs-16">{item.property_info.sqft} sqft</span>
-                                       </li>
-                                       <li className="d-flex align-items-center">
-                                          <img src="/assets/images/icon/icon_05.svg" alt=""
-                                             className="lazy-img icon me-2" />
-                                          <span className="fs-16">{item.property_info.bed} bed</span>
-                                       </li>
-                                       <li className="d-flex align-items-center">
-                                          <img src="/assets/images/icon/icon_06.svg" alt=""
-                                             className="lazy-img icon me-2" />
-                                          <span className="fs-16">{item.property_info.bath} bath</span>
-                                       </li>
-                                    </ul>
-                                    <div className="pl-footer top-border d-flex align-items-center justify-content-between">
-                                       <strong className="price fw-500 color-dark">
-                                          ${item.price.toLocaleString(undefined, {
-                                             minimumFractionDigits: item.price_text ? 0 : 2,
-                                             maximumFractionDigits: 2
-                                          })}{item.price_text && <>/<sub>m</sub></>}
-                                       </strong>
-                                       <Link to="/listing_details_01" className="btn-four rounded-circle"><i className="bi bi-arrow-up-right"></i></Link>
-                                    </div>
-                                 </div>
-                              </div>
-                           </div>
-                        ))}
-                     </div>
-                     <ReactPaginate
-                        breakLabel="..."
-                        nextLabel={<img src="/assets/images/icon/icon_46.svg" alt="" className="ms-2" />}
-                        onPageChange={handlePageClick}
-                        pageRangeDisplayed={pageCount}
-                        pageCount={pageCount}
-                        previousLabel={<img src="/assets/images/icon/icon_46.svg" alt="" className="ms-2" />}
-                        renderOnZeroPageCount={null}
-                        className="pagination-one d-flex align-items-center justify-content-center justify-content-sm-start style-none pt-30"
-                     />
-                  </div>
-               </div>
+    const handleNext = () => {
+      setCurrentIndex((prevIndex) => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));
+      console.log('Next Index:', currentIndex); // Debugging
+    };
 
-               <div className="col-lg-4 order-lg-first">
-                  <div className="advance-search-panel dot-bg md-mt-80">
-                     <div className="main-bg">
-                        <DropdownOne
-                           handleSearchChange={handleSearchChange}
-                           handleBedroomChange={handleBedroomChange}
-                           handleBathroomChange={handleBathroomChange}
-                           handlePriceChange={handlePriceChange}
-                           maxPrice={maxPrice}
-                           priceValue={priceValue}
-                           handleResetFilter={handleResetFilter}
-                           selectedAmenities={selectedAmenities}
-                           handleAmenityChange={handleAmenityChange}
-                           handleLocationChange={handleLocationChange}
-                           handleStatusChange={handleStatusChange}
-                        />
-                     </div>
-                  </div>
-               </div>
+    // Debugging: Log the current image URL
+    useEffect(() => {
+      console.log('Current Image:', images[currentIndex]);
+    }, [currentIndex, images]);
+
+    return (
+      <div style={{ position: 'relative', width: '100%', height: '200px', overflow: 'hidden', borderRadius: '10px' }}>
+        {/* Placeholder Image */}
+        {isLoading && (
+          <div
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: '#f0f0f0',
+            }}
+          >
+            <div>Loading...</div>
+          </div>
+        )}
+
+        {/* Actual Image */}
+        <img
+          key={currentIndex} // Force re-render when currentIndex changes
+          src={images[currentIndex]}
+          alt={`Property ${currentIndex + 1}`}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: isLoading ? 'none' : 'block',
+          }}
+          onLoad={() => setIsLoading(false)}
+        />
+
+        {/* Navigation Buttons (Only show if there are multiple images) */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={handlePrev}
+              style={{
+                position: 'absolute',
+                left: '10px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '50%',
+                width: '30px',
+                height: '30px',
+                cursor: 'pointer',
+              }}
+            >
+              &lt;
+            </button>
+            <button
+              onClick={handleNext}
+              style={{
+                position: 'absolute',
+                right: '10px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '50%',
+                width: '30px',
+                height: '30px',
+                cursor: 'pointer',
+              }}
+            >
+              &gt;
+            </button>
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '10px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                color: '#fff',
+                padding: '5px 10px',
+                borderRadius: '5px',
+                fontSize: '14px',
+              }}
+            >
+              {`${currentIndex + 1}/${images.length}`}
             </div>
-         </div>
+          </>
+        )}
       </div>
-   )
-}
+    );
+  };
 
-export default ListingOneArea
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+
+  return (
+    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+      {/* Top Bar */}
+      <div
+        style={{
+          backgroundColor: '#1d201d',
+          color: '#fbfbfb',
+          padding: '20px',
+          textAlign: 'center',
+          marginBottom: '20px',
+          marginTop: '100px',
+          borderRadius: '10px',
+        }}
+      >
+        <h1 style={{ margin: 0, color: '#fff' }}>Property Listings</h1>
+      </div>
+
+      {/* Filter Options */}
+      <div
+        style={{
+          display: 'flex',
+          gap: '10px',
+          marginBottom: '20px',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexWrap: 'nowrap',
+        }}
+      >
+        <select
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          style={{
+            padding: '10px',
+            borderRadius: '5px',
+            border: '1px solid #ddd',
+            backgroundColor: '#fff',
+            cursor: 'pointer',
+            flex: '1',
+          }}
+        >
+          <option value="">All Categories</option>
+          <option value="Residential">Residential</option>
+          <option value="Commercial">Commercial</option>
+          {/* Add other categories as needed */}
+        </select>
+
+        <input
+          type="number"
+          placeholder="Min Price"
+          onChange={(e) => setPriceRange({ ...priceRange, min: Number(e.target.value) || 0 })}
+          style={{
+            padding: '10px',
+            borderRadius: '5px',
+            border: '1px solid #ddd',
+            backgroundColor: '#fff',
+            flex: '1',
+          }}
+        />
+        <input
+          type="number"
+          placeholder="Max Price"
+          onChange={(e) => setPriceRange({ ...priceRange, max: Number(e.target.value) || Infinity })}
+          style={{
+            padding: '10px',
+            borderRadius: '5px',
+            border: '1px solid #ddd',
+            backgroundColor: '#fff',
+            flex: '1',
+          }}
+        />
+      </div>
+
+      {/* Property Listings */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '20px',
+        }}
+      >
+        {filteredProperties.map((property) => (
+          <div
+            key={property._id}
+            style={{
+              border: '1px solid #ddd',
+              borderRadius: '10px',
+              padding: '20px',
+              backgroundColor: '#fff',
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.02)')}
+            onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+          >
+            {/* Image Carousel */}
+            {property.images && property.images.length > 0 && (
+              <ImageCarousel images={property.images} />
+            )}
+
+            {/* Property Details */}
+            <h2 style={{ marginTop: '20px', color: '#333' }}>{property.title}</h2>
+            <p style={{ color: '#666' }}>{property.description}</p>
+            <p>
+              <strong>Category:</strong> {property.category}
+            </p>
+            <p>
+              <strong>Price:</strong> {property.price}
+            </p>
+            <p>
+              <strong>Bedrooms:</strong> {property.bedrooms}
+            </p>
+            <p>
+              <strong>Bathrooms:</strong> {property.bathrooms}
+            </p>
+            <p>
+              <strong>City:</strong> {property.city}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default ListingOneArea;

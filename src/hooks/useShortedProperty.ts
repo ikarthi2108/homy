@@ -1,6 +1,5 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import listing_data from "../data/inner-data/ListingData";
 import UseProperty from "./UseProperty";
 import { selectProperties } from "../redux/features/propertySlice";
 
@@ -10,8 +9,6 @@ interface DataType {
 }
 
 const UseShortedProperty = ({ itemsPerPage, page }: DataType) => {
-
-   const all_property = listing_data;
 
    const { properties, setProperties } = UseProperty();
    const filteredProperties = properties.filter((item) => item.page === page);
@@ -78,28 +75,28 @@ const UseShortedProperty = ({ itemsPerPage, page }: DataType) => {
       // Status filtering
       if (status !== null) {
          filtered = filtered.filter((item) => {
-            return item.status.toLowerCase().includes(status.toLowerCase());
+            return item.listedIn.toLowerCase().includes(status.toLowerCase());
          });
       }
 
       // Location filtering
       if (location !== null) {
          filtered = filtered.filter((item) => {
-            return item.location.toLowerCase().includes(location.toLowerCase());
+            return item.city.toLowerCase().includes(location.toLowerCase());
          });
       }
 
       // Bedrooms filtering
       if (selectedBedrooms !== null) {
          filtered = filtered.filter((item) => {
-            return item.property_info.bed.toLowerCase().includes(selectedBedrooms.toLowerCase());
+            return item.bedrooms.toString() === selectedBedrooms;
          });
       }
 
       // Bathrooms filtering
       if (selectedBathrooms !== null) {
          filtered = filtered.filter((item) => {
-            return item.property_info.bath.toLowerCase().includes(selectedBathrooms.toLowerCase());
+            return item.bathrooms.toString() === selectedBathrooms;
          });
       }
 
@@ -114,11 +111,11 @@ const UseShortedProperty = ({ itemsPerPage, page }: DataType) => {
       // Type filtering
       switch (sortOption) {
          case "newest":
-            return filtered.filter((item) => item.type === "newest");
+            return filtered.filter((item) => item.category === "newest");
          case "best_seller":
-            return filtered.filter((item) => item.type === "Best Seller");
+            return filtered.filter((item) => item.category === "Best Seller");
          case "best_match":
-            return filtered.filter((item) => item.type === "Best Match");
+            return filtered.filter((item) => item.category === "Best Match");
          case "price_low":
             return filtered.sort((a, b) => a.price - b.price);
          case "price_high":
@@ -150,34 +147,19 @@ const UseShortedProperty = ({ itemsPerPage, page }: DataType) => {
    };
 
    // handle Price
-   const maxPrice = all_property.filter(item => item.page === page).reduce((max, item) => {
+   const maxPrice = filteredProperties.reduce((max, item) => {
       return item.price > max ? item.price : max;
    }, 0);
    const [priceValue, setPriceValue] = useState([0, maxPrice]);
 
    useEffect(() => {
-      const filterPrice = all_property.filter((j) => j.price >= priceValue[0] && j.price <= priceValue[1]);
+      const filterPrice = filteredProperties.filter((j) => j.price >= priceValue[0] && j.price <= priceValue[1]);
       setProperties(filterPrice)
    }, [priceValue]);
 
    const handlePriceChange = (val: number[]) => {
       setPriceValue(val)
    }
-
-
-   const priceRanges: {
-      [key: string]: number[];
-   } = {
-      "1": [10000, 200000],
-      "2": [20000, 300000],
-      "3": [30000, 400000],
-   };
-
-   const handlePriceDropChange = (selectedValue: string) => {
-      const selectedRange = priceRanges[selectedValue];
-      const newPriceValue = selectedRange ? selectedRange : [0, maxPrice];
-      setPriceValue(newPriceValue);
-   };
 
    const resetFilters = () => {
       setSortOption("");
@@ -191,7 +173,6 @@ const UseShortedProperty = ({ itemsPerPage, page }: DataType) => {
    };
 
    return {
-      handlePriceDropChange,
       itemOffset,
       sortedProperties,
       currentItems,
