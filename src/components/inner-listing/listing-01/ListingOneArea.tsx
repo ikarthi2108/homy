@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Modal from 'react-modal'; // Import a modal library
+
+// Set the root element for accessibility (required by react-modal)
+Modal.setAppElement('#root');
 
 const ListingOneArea: React.FC = () => {
   const [properties, setProperties] = useState<any[]>([]);
@@ -9,6 +13,8 @@ const ListingOneArea: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [locationFilter, setLocationFilter] = useState<string>('');
   const [priceRange, setPriceRange] = useState<{ min: number; max: number }>({ min: 0, max: Infinity });
+  const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
+  const [contactNumber, setContactNumber] = useState<string>('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,6 +42,15 @@ const ListingOneArea: React.FC = () => {
     setFilteredProperties(filtered);
   }, [categoryFilter, locationFilter, priceRange, properties]);
 
+  const openModal = (contactNumber: string) => {
+    setContactNumber(contactNumber);
+    setModalIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalIsOpen(false);
+  };
+
   // Image Carousel Component
   const ImageCarousel: React.FC<{ images: string[] }> = ({ images }) => {
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -43,22 +58,14 @@ const ListingOneArea: React.FC = () => {
 
     const handlePrev = () => {
       setCurrentIndex((prevIndex) => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
-      console.log('Previous Index:', currentIndex); // Debugging
     };
 
     const handleNext = () => {
       setCurrentIndex((prevIndex) => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));
-      console.log('Next Index:', currentIndex); // Debugging
     };
-
-    // Debugging: Log the current image URL
-    useEffect(() => {
-      console.log('Current Image:', images[currentIndex]);
-    }, [currentIndex, images]);
 
     return (
       <div style={{ position: 'relative', width: '100%', height: '200px', overflow: 'hidden', borderRadius: '10px' }}>
-        {/* Placeholder Image */}
         {isLoading && (
           <div
             style={{
@@ -74,9 +81,8 @@ const ListingOneArea: React.FC = () => {
           </div>
         )}
 
-        {/* Actual Image */}
         <img
-          key={currentIndex} // Force re-render when currentIndex changes
+          key={currentIndex}
           src={images[currentIndex]}
           alt={`Property ${currentIndex + 1}`}
           style={{
@@ -88,7 +94,6 @@ const ListingOneArea: React.FC = () => {
           onLoad={() => setIsLoading(false)}
         />
 
-        {/* Navigation Buttons (Only show if there are multiple images) */}
         {images.length > 1 && (
           <>
             <button
@@ -199,7 +204,6 @@ const ListingOneArea: React.FC = () => {
           <option value="">All Categories</option>
           <option value="Residential">Residential</option>
           <option value="Commercial">Commercial</option>
-          {/* Add other categories as needed */}
         </select>
 
         <select
@@ -217,10 +221,10 @@ const ListingOneArea: React.FC = () => {
           <option value="">All Locations</option>
           <option value="Bangalore">Bangalore</option>
           <option value="Chennai">Chennai</option>
+          <option value="Coimbatore">Coimbatore</option>
           <option value="Hyderabad">Hyderabad</option>
           <option value="Kochi">Kochi</option>
           <option value="Trivandrum">Trivandrum</option>
-          {/* Add other locations as needed */}
         </select>
 
         <input
@@ -279,7 +283,7 @@ const ListingOneArea: React.FC = () => {
               )}
 
               {/* Property Details */}
-              <h2 style={{ marginTop: '20px', color: '#333' }}>{property.title}</h2>
+              <h4 style={{ marginTop: '20px', color: '#333' }}><b>{property.title}</b></h4>
               <p style={{ color: '#666' }}>{property.description}</p>
               <p>
                 <strong>Category:</strong> {property.category}
@@ -296,6 +300,23 @@ const ListingOneArea: React.FC = () => {
               <p>
                 <strong>City:</strong> {property.city}
               </p>
+
+              {/* Show Contact Button */}
+              <button
+                onClick={() => openModal(property.ownerContactNumber)}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#1d201d',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                  marginTop: '10px',
+                  width: '100%',
+                }}
+              >
+                Show Contact
+              </button>
             </div>
           ))
         ) : (
@@ -314,6 +335,47 @@ const ListingOneArea: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Modal */}
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={closeModal}
+        style={{
+          content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+            width: '300px',
+            padding: '20px',
+            borderRadius: '10px',
+            textAlign: 'center',
+          },
+          overlay: {
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          },
+        }}
+      >
+        <h6>Contact Number</h6>
+        <p>{contactNumber}</p>
+        <button
+          onClick={closeModal}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: '#1d201d',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            marginTop: '10px',
+         marginInlineStart:'80px'
+          }}
+        >
+          Close
+        </button>
+      </Modal>
     </div>
   );
 };

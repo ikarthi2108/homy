@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface Property {
   _id: string;
@@ -18,73 +19,30 @@ interface Property {
   amenities: string[];
   address: string;
   city: string;
+  ownerContactNumber: string;
   images: string[];
 }
 
 const FilteredProperty: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
+  const [selectedContact, setSelectedContact] = useState<string | null>(null);
   const location = useLocation();
-  const criteria = location.state;
+  const criteria = location.state || {};
 
-  console.log("criteria", criteria);
+  console.log(criteria);
+  
 
   useEffect(() => {
     const fetchProperties = async () => {
       try {
         const response = await axios.get('http://localhost:5000/api/properties');
         const allProperties: Property[] = response.data.properties || [];
-
-        if (!criteria) {
-          console.warn('No criteria provided. Displaying all properties.');
-          setProperties(allProperties); // If no criteria, show all properties
-          return;
-        }
-
-        const filteredProperties = allProperties.filter((property: Property) => {
-          const category = property.category || '';
-          const locationCity = property.city || '';
-          const price = property.price || 0;
-
-          console.log("location from API", locationCity);
-
-          // Primary filter: Location must match
-          const matchesLocation =
-            !criteria?.location ||
-            locationCity.toLowerCase() === criteria.location.toLowerCase();
-
-            console.log("hi",matchesLocation);
-            
-
-          // Secondary filters: Category and Price Range (only applied if provided)
-          const matchesCategory =
-            !criteria?.category ||
-            category.toLowerCase() === criteria.category.toLowerCase();
-
-          const matchesPriceRange = !criteria?.priceRange || (() => {
-            const priceRange = parseInt(criteria.priceRange, 10);
-            const ranges: [number, number][] = [
-              [3000, 5000],
-              [5000, 8000],
-              [8000, 10000],
-              [10000, 15000],
-              [15000, 20000],
-              [20000, 30000],
-              [30000, 50000],
-            ];
-
-            if (isNaN(priceRange) || priceRange < 1 || priceRange > ranges.length) {
-              console.warn(`Invalid priceRange: ${criteria.priceRange}`);
-              return false;
-            }
-
-            const [min, max] = ranges[priceRange - 1];
-            return price >= min && price <= max;
-          })();
-
-          // Match location first, then apply secondary filters if provided
-          return matchesLocation && (!criteria.category || matchesCategory) && (!criteria.priceRange || matchesPriceRange);
+        const filteredProperties = allProperties.filter(property => {
+          const matchesCategory = criteria.category ? property.category.toLowerCase() === criteria.category.toLowerCase() : true;
+          const matchesLocation = criteria.location ? property.city.toLowerCase() === criteria.location.toLowerCase() : true;
+          const matchesPriceRange = criteria.priceRange ? property.price <= parseInt(criteria.priceRange) : true;
+          return matchesCategory && matchesLocation && matchesPriceRange;
         });
-
         setProperties(filteredProperties);
       } catch (error) {
         console.error('Error fetching properties:', error);
@@ -95,42 +53,34 @@ const FilteredProperty: React.FC = () => {
   }, [criteria]);
 
   return (
-    <div className="container">
-      <h1>Filtered Properties</h1>
+    <div className="container mt-4">
+      <h1 className="mb-4 text-center">Filtered Properties</h1>
       <div className="row">
         {properties.length > 0 ? (
           properties.map((property) => (
             <div key={property._id} className="col-md-4 mb-4">
-              <div className="card">
-                {/* Ensure there is at least one image */}
-                {property.images && property.images.length > 0 ? (
-                  <img
-                    src={property.images[0]}
-                    className="card-img-top"
-                    alt={property.title}
-                  />
-                ) : (
-                  <img
-                    src="https://via.placeholder.com/150"
-                    className="card-img-top"
-                    alt="No Image Available"
-                  />
-                )}
+              <div className="card shadow-sm border-0">
+                <img
+                  src={property.images && property.images.length > 0 ? property.images[0] : 'https://via.placeholder.com/300'}
+                  className="card-img-top"
+                  alt={property.title}
+                  style={{ height: '200px', objectFit: 'cover' }}
+                />
                 <div className="card-body">
                   <h5 className="card-title">{property.title}</h5>
-                  <p className="card-text">{property.description}</p>
-                  <ul className="list-group list-group-flush">
-                    <li className="list-group-item">Price: ₹{property.price}</li>
-                    <li className="list-group-item">Size: {property.size} sqft</li>
-                    <li className="list-group-item">Bedrooms: {property.bedrooms}</li>
-                    <li className="list-group-item">Bathrooms: {property.bathrooms}</li>
-                    <li className="list-group-item">Kitchens: {property.kitchens}</li>
-                    <li className="list-group-item">Year Built: {property.yearBuilt}</li>
-                    <li className="list-group-item">Floors: {property.floors}</li>
-                    <li className="list-group-item">Amenities: {property.amenities.join(', ')}</li>
-                    <li className="list-group-item">Address: {property.address}</li>
-                    <li className="list-group-item">Location: {property.city || 'N/A'}</li>
-                  </ul>
+                  <p className="card-text text-muted">{property.description}</p>
+                  <p className="mb-1">
+                    <strong>Price:</strong> ₹{property.price}
+                  </p>
+                  <p>
+                    <strong>Location:</strong> {property.city || 'N/A'}
+                  </p>
+                  <button
+                    className="btn btn-primary w-100"
+                    onClick={() => setSelectedContact(property.ownerContactNumber)}
+                  >
+                    Show Contact
+                  </button>
                 </div>
               </div>
             </div>
@@ -139,6 +89,42 @@ const FilteredProperty: React.FC = () => {
           <p>No properties found matching the criteria.</p>
         )}
       </div>
+
+      {selectedContact && (
+        <div
+          className="modal show d-block"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          onClick={() => setSelectedContact(null)}
+        >
+          <div
+            className="modal-dialog modal-dialog-centered"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Owner Contact</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setSelectedContact(null)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p className="text-center fs-5">📞 {selectedContact}</p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setSelectedContact(null)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

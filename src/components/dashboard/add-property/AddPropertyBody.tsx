@@ -19,7 +19,8 @@ interface PropertyFormData {
     location: { lat: number; lng: number };
     amenities: string[];
     images: string[];
-    city: string; // Add city field
+    city: string;
+    ownerContactNumber: string; // Add owner contact number field
 }
 
 const AddProperty: React.FC = () => {
@@ -39,7 +40,8 @@ const AddProperty: React.FC = () => {
         location: { lat: 12.9716, lng: 77.5946 }, // Default location (Bangalore, India)
         amenities: [],
         images: [],
-        city: '', // Initialize city field
+        city: '',
+        ownerContactNumber: '', // Initialize owner contact number field
     });
 
     const [loading, setLoading] = useState(false);
@@ -266,6 +268,16 @@ const AddProperty: React.FC = () => {
                         </option>
                     ))}
                 </select>
+            </div>
+
+            <div className="form-section">
+                <label>Owner Contact Number</label>
+                <input
+                    type="text"
+                    name="ownerContactNumber"
+                    value={formData.ownerContactNumber}
+                    onChange={handleChange}
+                />
             </div>
 
             <div className="form-section">

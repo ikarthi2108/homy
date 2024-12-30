@@ -1,42 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import NiceSelect from "../../../ui/NiceSelect";
 import { useNavigate } from 'react-router-dom';
 
 const DropdownOne = ({ style }: any) => {
   const navigate = useNavigate();
+  const [criteria, setCriteria] = useState({
+    category: "",
+    location: "",
+    priceRange: "",
+  });
+
+  const handleSelectChange = (value: string, name: string) => {
+    setCriteria((prev) => ({ ...prev, [name]: value }));
+    console.log(`Selected ${name}:`, value);
+  };
 
   const searchHandler = (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const criteria = {
-      category: formData.get('category') || "", // Remove default value
-      location: formData.get('location') || "", // Remove default value
-      priceRange: formData.get('priceRange') || "", // Remove default value
-    };
-    // navigate('/filtered-properties', { state: criteria });
-    navigate('/listing_01')
-  };
-
-  const handleSelectChange = (value: string, name: string) => {
-    console.log(`Selected ${name}:`, value);
-    // Handle changes specific to the dropdowns if needed
+    navigate('/filtered-properties', { state: criteria });
   };
 
   return (
     <form onSubmit={searchHandler}>
       <div className="row gx-0 align-items-center">
-        {/* <div className="col-xl-3 col-lg-4">
+        <div className="col-xl-3 col-lg-4">
           <div className="input-box-one border-left">
             <div className="label">I’m looking to...</div>
             <NiceSelect
               className={`nice-select ${style ? "fw-normal" : ""}`}
               options={[
-                { value: "Renthouse", text: "Rent Houses" },
-                { value: "sellhouse", text: "Sell Houses" },
-                { value: "pgmen", text: "Looking For PG Men's" },
-                { value: "pgwomen", text: "Looking For PG Women's" },
-                { value: "pgcoliving", text: "Looking For PG Co-Living" },
-                { value: "buyapartments", text: "Buy Apartments" },
+                { value: "Rent", text: "Rent" },
+                { value: "Sell", text: "Sell" },
+                { value: "pgmen", text: "PG Men's" },
+                { value: "pgwomen", text: "PG Women's" },
+                { value: "pgcoliving", text: "PG Co-Living" },
+                { value: "buyapartments", text: "Apartments" },
               ]}
               defaultCurrent={0}
               name="category"
@@ -46,19 +44,19 @@ const DropdownOne = ({ style }: any) => {
               placeholder=""
             />
           </div>
-        </div> */}
-        {/* <div className={`${style ? "col-xl-3" : "col-xl-4"} col-lg-4`}>
+        </div>
+        <div className={`${style ? "col-xl-3" : "col-xl-4"} col-lg-4`}>
           <div className="input-box-one border-left">
             <div className="label">Location</div>
             <NiceSelect
               className={`nice-select location ${style ? "fw-normal" : ""}`}
               options={[
-                { value: "bangalore", text: "Bangalore, India" },
-                { value: "chennai", text: "Chennai, India" },
-                { value: "coimbatore", text: "Coimbatore, India" },
-                { value: "hyderabad", text: "Hyderabad, India" },
-                { value: "kochi", text: "Kochi, India" },
-                { value: "trivandrum", text: "Trivandrum, India" },
+                { value: "bangalore", text: "Bangalore" },
+                { value: "chennai", text: "Chennai" },
+                { value: "coimbatore", text: "Coimbatore" },
+                { value: "hyderabad", text: "Hyderabad" },
+                { value: "kochi", text: "Kochi" },
+                { value: "trivandrum", text: "Trivandrum" },
               ]}
               defaultCurrent={0}
               name="location"
@@ -68,8 +66,8 @@ const DropdownOne = ({ style }: any) => {
               placeholder=""
             />
           </div>
-        </div> */}
-        {/* <div className="col-xl-3 col-lg-4">
+        </div>
+        <div className="col-xl-3 col-lg-4">
           <div className="input-box-one border-left border-lg-0">
             <div className="label">Price Range</div>
             <NiceSelect
@@ -91,7 +89,7 @@ const DropdownOne = ({ style }: any) => {
               placeholder=""
             />
           </div>
-        </div> */}
+        </div>
         <div className={`${style ? "col-xl-3" : "col-xl-2"}`}>
           <div className="input-box-one lg-mt-10">
             <button
@@ -101,7 +99,7 @@ const DropdownOne = ({ style }: any) => {
                   : "text-uppercase search-btn"
               }`}
             >
-              {style ? "Search Now" : "Explore Our Listings"}
+              {style ? "Search Now" : "Search"}
             </button>
           </div>
         </div>
